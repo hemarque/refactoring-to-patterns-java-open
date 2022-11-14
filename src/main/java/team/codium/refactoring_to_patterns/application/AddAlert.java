@@ -46,13 +46,11 @@ public class AddAlert {
                         Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters,
                         Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException, InvalidAlertTypeException {
         new PostalCode(postalCode);
-
         if (!(minimumPrice == null || minimumPrice >= 0)) {
             throw new InvalidPriceException("Price cannot be negative");
         }
-        if (!(minimumPrice == null || maximumPrice == null || minimumPrice <= maximumPrice)) {
-            throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
-        }
+        new PriceRange(minimumPrice, maximumPrice);
+
         if (!isAlertTypeValid(alertType)) {
             throw new InvalidAlertTypeException("The alert type " + alertType + " does not exist");
         }
