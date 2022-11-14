@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 public class AddProperty {
     private final String propertiesFile;
@@ -56,22 +55,21 @@ public class AddProperty {
         }
     }
 
-    public void execute(int id, String description, String postalCode, int price, int numberOfRooms, int squareMeters,
-                        int ownerId) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException {
+    public void execute(AddPropertyCommand addPropertyCommand) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException {
         Property property;
-        new PostalCode(postalCode);
-        new Price(price);
+        new PostalCode(addPropertyCommand.postalCode());
+        new Price(addPropertyCommand.price());
 
         String usersAsString = readJSONFileContent(usersFile);
         User[] users = new Gson().fromJson(usersAsString, User[].class);
-        Optional<User> user = Arrays.stream(users).filter(u -> u.getId() == ownerId).findFirst();
+        Optional<User> user = Arrays.stream(users).filter(u -> u.getId() == addPropertyCommand.ownerId()).findFirst();
         if (!user.isPresent()) {
-            throw new InvalidUserIdException("The owner " + ownerId + " does not exist");
+            throw new InvalidUserIdException("The owner " + addPropertyCommand.ownerId() + " does not exist");
         }
         String propertiesAsString = readJSONFileContent(propertiesFile);
         ArrayList<Property> allProperties =
                 new ArrayList<>(Arrays.asList(new Gson().fromJson(propertiesAsString, Property[].class)));
-        property = new Property(id, description, postalCode, price, numberOfRooms, squareMeters, ownerId);
+        property = new Property(addPropertyCommand.id(), addPropertyCommand.description(), addPropertyCommand.postalCode(), addPropertyCommand.price(), addPropertyCommand.numberOfRooms(), addPropertyCommand.squareMeters(), addPropertyCommand.ownerId());
         allProperties.add(property);
         writePropertiesFile(allProperties);
         ArrayList<Alert> alerts =

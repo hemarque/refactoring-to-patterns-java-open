@@ -34,7 +34,7 @@ public class AddPropertyTest {
     public void new_valid_property_can_be_retrieved() throws Exception {
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), null, false);
 
-        addProperty.execute(123, "New property", "04600", 140_000, 3, 160, 1);
+        addProperty.execute(new AddPropertyCommand(123, "New property", "04600", 140_000, 3, 160, 1));
 
         String propertiesAsString = Files.readString(Paths.get(PROPERTIES));
         Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
@@ -53,8 +53,8 @@ public class AddPropertyTest {
     public void can_store_more_than_one_property() throws Exception {
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), null, false);
 
-        addProperty.execute(1, "New property", "04600", 140_000, 3, 160, 1);
-        addProperty.execute(2, "New property", "04600", 140_000, 3, 160, 1);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 140_000, 3, 160, 1));
+        addProperty.execute(new AddPropertyCommand(2, "New property", "04600", 140_000, 3, 160, 1));
 
         String propertiesAsString = Files.readString(Paths.get(PROPERTIES));
         Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
@@ -66,7 +66,7 @@ public class AddPropertyTest {
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), null, false);
 
         InvalidPostalCodeException exception = Assertions.assertThrows(InvalidPostalCodeException.class, () ->
-                addProperty.execute(1, "New property", "046000", 140_000, 3, 160, 1)
+                addProperty.execute(new AddPropertyCommand(1, "New property", "046000", 140_000, 3, 160, 1))
         );
 
         assertThat(exception.getMessage(), Matchers.is("046000 is not a valid postal code"));
@@ -77,7 +77,7 @@ public class AddPropertyTest {
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), null, false);
 
         InvalidPriceException exception = Assertions.assertThrows(InvalidPriceException.class, () ->
-                addProperty.execute(1, "New property", "04600", -1, 3, 160, 1)
+                addProperty.execute(new AddPropertyCommand(1, "New property", "04600", -1, 3, 160, 1))
         );
 
         assertThat(exception.getMessage(), Matchers.is("Price cannot be negative"));
@@ -88,7 +88,7 @@ public class AddPropertyTest {
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), null, false);
 
         InvalidUserIdException exception = Assertions.assertThrows(InvalidUserIdException.class, () ->
-                addProperty.execute(1, "New property", "04600", 100_000, 3, 160, NON_EXISTING_OWNER)
+                addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, NON_EXISTING_OWNER))
         );
 
         assertThat(exception.getMessage(), Matchers.is("The owner " + NON_EXISTING_OWNER + " does not exist"));
@@ -101,7 +101,7 @@ public class AddPropertyTest {
         EmailSender emailSender = mock(EmailSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, mock(SmsSender.class), mock(PushSender.class), null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verify(emailSender).sendEmail(new Email("noreply@codium.team", "rDeckard@email.com", "There is a new property at 04600", "More information at https://properties.codium.team/1"));
     }
@@ -113,7 +113,7 @@ public class AddPropertyTest {
         SmsSender smsSender = mock(SmsSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, smsSender, mock(PushSender.class), null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verify(smsSender).sendSMSAlert(new SmsMessage("673777555", "There is a new property at 04600. More information at https://properties.codium.team/1"));
     }
@@ -125,7 +125,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verify(pushSender).sendPushNotification(new PushMessage("673777555", "There is a new property at 04600. More information at https://properties.codium.team/1"));
     }
@@ -141,7 +141,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verify(emailSender, times(1)).sendEmail(any());
         verify(smsSender, times(1)).sendSMSAlert(any());
@@ -159,7 +159,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "00001", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "00001", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -177,7 +177,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -195,7 +195,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -213,7 +213,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -231,7 +231,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -249,7 +249,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -267,7 +267,7 @@ public class AddPropertyTest {
         PushSender pushSender = mock(PushSender.class);
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS, smsSender, pushSender, null, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         verifyNoInteractions(emailSender);
         verifyNoInteractions(smsSender);
@@ -279,7 +279,7 @@ public class AddPropertyTest {
         InMemoryLogger logger = new InMemoryLogger();
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), logger, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         assertThat(logger.getLoggedData().size(), is(1));
         HashMap<String, Object> log = logger.getLoggedData().get(0);
@@ -297,7 +297,7 @@ public class AddPropertyTest {
         InMemoryLogger logger = new InMemoryLogger();
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), logger, true);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
         assertThat(loggedData.containsKey("date"), Matchers.is(true));
@@ -308,7 +308,7 @@ public class AddPropertyTest {
         InMemoryLogger logger = new InMemoryLogger();
         AddProperty addProperty = new AddProperty(PROPERTIES, USERS_FILE, mock(EmailSender.class), ALERTS, mock(SmsSender.class), mock(PushSender.class), logger, false);
 
-        addProperty.execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
         assertThat(loggedData.containsKey("date"), Matchers.is(false));
