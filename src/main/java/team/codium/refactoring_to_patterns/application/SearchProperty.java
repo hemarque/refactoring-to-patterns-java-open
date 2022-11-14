@@ -21,17 +21,17 @@ final public class SearchProperty {
         this.addDateToLogger = addDateToLogger;
     }
 
-    public Property[] search(String postalCode, Integer minimumPrice, Integer maximumPrice, Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters, Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException {
+    public Property[] search(SearchQuery searchQuery) throws InvalidPostalCodeException, InvalidPriceException {
         Property[] properties;
-        new PostalCode(postalCode);
-        new Price(minimumPrice);
-        PriceRange priceRange = new PriceRange(minimumPrice, maximumPrice);
-        RoomRange roomRange = new RoomRange(minimumRooms, maximumRooms);
-        SquareMetersRange squareMetersRange = new SquareMetersRange(minimumSquareMeters, maximumSquareMeters);
+        new PostalCode(searchQuery.postalCode());
+        new Price(searchQuery.minimumPrice());
+        PriceRange priceRange = new PriceRange(searchQuery.minimumPrice(), searchQuery.maximumPrice());
+        RoomRange roomRange = new RoomRange(searchQuery.minimumRooms(), searchQuery.maximumRooms());
+        SquareMetersRange squareMetersRange = new SquareMetersRange(searchQuery.minimumSquareMeters(), searchQuery.maximumSquareMeters());
         String propertiesAsString = readPropertiesFile();
         Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
         properties = Arrays.stream(allProperties)
-                .filter(property -> property.getPostalCode().equals(postalCode))
+                .filter(property -> property.getPostalCode().equals(searchQuery.postalCode()))
                 .filter(property -> priceRange.isInRange(property))
                 .filter(property -> roomRange.isInRange(property))
                 .filter(property -> squareMetersRange.isInRange(property))
@@ -40,9 +40,9 @@ final public class SearchProperty {
 
         if (logger != null) {
             HashMap<String, Object> data = new HashMap<>() {{
-                put("postalCode", postalCode);
-                put("minimumPrice", minimumPrice);
-                put("maximumPrice", maximumPrice);
+                put("postalCode", searchQuery.postalCode());
+                put("minimumPrice", searchQuery.minimumPrice());
+                put("maximumPrice", searchQuery.maximumPrice());
             }};
             if (addDateToLogger) {
                 data.put("date", LocalDate.now());

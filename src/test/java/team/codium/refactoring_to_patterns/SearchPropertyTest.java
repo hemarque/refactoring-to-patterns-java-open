@@ -6,6 +6,7 @@ import team.codium.refactoring_to_patterns.application.SearchProperty;
 import team.codium.refactoring_to_patterns.domain.InvalidPostalCodeException;
 import team.codium.refactoring_to_patterns.domain.InvalidPriceException;
 import team.codium.refactoring_to_patterns.domain.Property;
+import team.codium.refactoring_to_patterns.domain.SearchQuery;
 import team.codium.refactoring_to_patterns.infrastructure.InMemoryLogger;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class SearchPropertyTest {
     public void find_properties_of_a_postal_code() throws Exception {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
-        Property[] properties = searchProperty.search("08030", null, null, null, null, null, null);
+        Property[] properties = searchProperty.search(new SearchQuery("08030", null, null, null, null, null, null));
 
         assertThat(properties.length, is(1));
         assertThat(properties[0].getDescription(), is("Flat in Barcelona"));
@@ -30,7 +31,7 @@ public class SearchPropertyTest {
     public void find_properties_within_a_price_range() throws Exception {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
-        Property[] properties = searchProperty.search("04600", 10_000, 100_000, null, null, null, null);
+        Property[] properties = searchProperty.search(new SearchQuery("04600", 10_000, 100_000, null, null, null, null));
 
         assertThat(properties.length, is(1));
         assertThat(properties[0].getDescription(), is("Cheap flat"));
@@ -40,7 +41,7 @@ public class SearchPropertyTest {
     public void find_properties_within_room_number() throws Exception {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
-        Property[] properties = searchProperty.search("04600", null, null, 1, 2, null, null);
+        Property[] properties = searchProperty.search(new SearchQuery("04600", null, null, 1, 2, null, null));
 
         assertThat(properties.length, is(1));
         assertThat(properties[0].getDescription(), is("Cheap flat"));
@@ -50,7 +51,7 @@ public class SearchPropertyTest {
     public void find_properties_within_a_square_meters() throws Exception {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
-        Property[] properties = searchProperty.search("04600", null, null, null, null, 80, 120);
+        Property[] properties = searchProperty.search(new SearchQuery("04600", null, null, null, null, 80, 120));
 
         assertThat(properties.length, is(1));
         assertThat(properties[0].getDescription(), is("Cheap flat"));
@@ -61,7 +62,7 @@ public class SearchPropertyTest {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
         InvalidPostalCodeException exception = Assertions.assertThrows(InvalidPostalCodeException.class, () ->
-                searchProperty.search("046000", null, null, null, null, 0, 0)
+                searchProperty.search(new SearchQuery("046000", null, null, null, null, 0, 0))
         );
 
         assertThat(exception.getMessage(), is("046000 is not a valid postal code"));
@@ -72,7 +73,7 @@ public class SearchPropertyTest {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
         InvalidPriceException exception = Assertions.assertThrows(InvalidPriceException.class, () ->
-                searchProperty.search("04600", -1, null, null, null, 0, 0)
+                searchProperty.search(new SearchQuery("04600", -1, null, null, null, 0, 0))
         );
 
         assertThat(exception.getMessage(), is("Price cannot be negative"));
@@ -83,7 +84,7 @@ public class SearchPropertyTest {
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, null, false);
 
         InvalidPriceException exception = Assertions.assertThrows(InvalidPriceException.class, () ->
-                searchProperty.search("04600", 100_000, 99_999, null, null, 0, 0)
+                searchProperty.search(new SearchQuery("04600", 100_000, 99_999, null, null, 0, 0))
         );
 
         assertThat(exception.getMessage(), is("The minimum price should be bigger than the maximum price"));
@@ -94,7 +95,7 @@ public class SearchPropertyTest {
         InMemoryLogger logger = new InMemoryLogger();
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, logger, false);
 
-        searchProperty.search("04600", 100_000, 200_000, 0, 999, null, null);
+        searchProperty.search(new SearchQuery("04600", 100_000, 200_000, 0, 999, null, null));
 
         assertThat(logger.getLoggedData().size(), is(1));
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
@@ -108,7 +109,7 @@ public class SearchPropertyTest {
         InMemoryLogger logger = new InMemoryLogger();
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, logger, true);
 
-        searchProperty.search("04600", 100_000, 200_000, 0, 999, null, null);
+        searchProperty.search(new SearchQuery("04600", 100_000, 200_000, 0, 999, null, null));
 
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
         assertThat(loggedData.containsKey("date"), is(true));
@@ -119,7 +120,7 @@ public class SearchPropertyTest {
         InMemoryLogger logger = new InMemoryLogger();
         SearchProperty searchProperty = new SearchProperty(PROPERTIES, logger, false);
 
-        searchProperty.search("04600", 100_000, 200_000, 0, 999, null, null);
+        searchProperty.search(new SearchQuery("04600", 100_000, 200_000, 0, 999, null, null));
 
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
         assertThat(loggedData.containsKey("date"), is(false));
