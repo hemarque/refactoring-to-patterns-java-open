@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "description": "Really cheap flat",
+    "postalCode": "04600",
+    "price": 5000,
+    "numberOfRooms": 0,
+    "squareMeters": 30,
+    "ownerId": 1
+  },
+  {
+    "id": 2,
+    "description": "Cheap flat",
+    "postalCode": "04600",
+    "price": 40000,
+    "numberOfRooms": 2,
+    "squareMeters": 90,
+    "ownerId": 1
+  },
+  {
+    "id": 3,
+    "description": "Expensive flat",
+    "postalCode": "04600",
+    "price": 1000000,
+    "numberOfRooms": 3,
+    "squareMeters": 240,
+    "ownerId": 1
+  },
+  {
+    "id": 4,
+    "description": "Flat in Barcelona",
+    "postalCode": "08030",
+    "price": 400000,
+    "numberOfRooms": 1,
+    "squareMeters": 90,
+    "ownerId": 1
+  }
+]
