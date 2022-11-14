@@ -60,9 +60,8 @@ public class AddProperty {
                         int ownerId) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException {
         Property property;
         new PostalCode(postalCode);
-        if (!(price >= 0)) {
-            throw new InvalidPriceException("Price cannot be negative");
-        }
+        new Price(price);
+
         String usersAsString = readJSONFileContent(usersFile);
         User[] users = new Gson().fromJson(usersAsString, User[].class);
         Optional<User> user = Arrays.stream(users).filter(u -> u.getId() == ownerId).findFirst();
