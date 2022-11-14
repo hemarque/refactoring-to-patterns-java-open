@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 final public class SearchProperty {
     private final String propertiesFile;
@@ -25,10 +24,7 @@ final public class SearchProperty {
     public Property[] search(String postalCode, Integer minimumPrice, Integer maximumPrice, Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters, Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException {
         Property[] properties;
         new PostalCode(postalCode);
-
-        if (!(minimumPrice == null || minimumPrice >= 0)) {
-            throw new InvalidPriceException("Price cannot be negative");
-        }
+        new Price(minimumPrice);
         new PriceRange(minimumPrice, maximumPrice);
 
         String propertiesAsString = readPropertiesFile();

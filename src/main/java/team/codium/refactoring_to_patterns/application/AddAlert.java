@@ -46,9 +46,7 @@ public class AddAlert {
                         Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters,
                         Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException, InvalidAlertTypeException {
         new PostalCode(postalCode);
-        if (!(minimumPrice == null || minimumPrice >= 0)) {
-            throw new InvalidPriceException("Price cannot be negative");
-        }
+        new Price(minimumPrice);
         new PriceRange(minimumPrice, maximumPrice);
 
         if (!isAlertTypeValid(alertType)) {
