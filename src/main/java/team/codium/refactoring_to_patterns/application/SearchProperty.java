@@ -1,10 +1,7 @@
 package team.codium.refactoring_to_patterns.application;
 
 import com.google.gson.Gson;
-import team.codium.refactoring_to_patterns.domain.InvalidPostalCodeException;
-import team.codium.refactoring_to_patterns.domain.InvalidPriceException;
-import team.codium.refactoring_to_patterns.domain.Logger;
-import team.codium.refactoring_to_patterns.domain.Property;
+import team.codium.refactoring_to_patterns.domain.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,9 +24,8 @@ final public class SearchProperty {
 
     public Property[] search(String postalCode, Integer minimumPrice, Integer maximumPrice, Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters, Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException {
         Property[] properties;
-        if (!Pattern.matches("^\\d{5}$", postalCode)) {
-            throw new InvalidPostalCodeException(postalCode + " is not a valid postal code");
-        }
+        new PostalCode(postalCode);
+
         if (!(minimumPrice == null || minimumPrice >= 0)) {
             throw new InvalidPriceException("Price cannot be negative");
         }
