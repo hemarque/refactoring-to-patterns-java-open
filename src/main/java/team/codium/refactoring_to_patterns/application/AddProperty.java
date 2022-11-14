@@ -59,9 +59,7 @@ public class AddProperty {
     public void execute(int id, String description, String postalCode, int price, int numberOfRooms, int squareMeters,
                         int ownerId) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException {
         Property property;
-        if (!Pattern.matches("^\\d{5}$", postalCode)) {
-            throw new InvalidPostalCodeException(postalCode + " is not a valid postal code");
-        }
+        new PostalCode(postalCode);
         if (!(price >= 0)) {
             throw new InvalidPriceException("Price cannot be negative");
         }
