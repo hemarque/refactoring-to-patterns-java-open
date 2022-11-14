@@ -68,7 +68,7 @@ public class AddAlert {
         alerts.add(alert);
         try {
             Files.writeString(Paths.get(alertsFile), new Gson().toJson(alerts));
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
 
         if (logger != null) {
@@ -88,8 +88,6 @@ public class AddAlert {
             }
             logger.log(data);
         }
-
-
     }
 
     private ArrayList<Alert> readAlerts() {

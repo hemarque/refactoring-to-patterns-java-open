@@ -38,6 +38,24 @@ public class AddProperty {
         this.addDateToLogger = addDateToLogger;
     }
 
+    private static boolean hasToSendTheAlert(Property property, Alert alert) {
+        return alert.postalCode().equals(property.getPostalCode()) &&
+                (alert.minimumPrice() == null || alert.minimumPrice() <= property.getPrice()) &&
+                (alert.maximumPrice() == null || alert.maximumPrice() >= property.getPrice()) &&
+                (alert.minimumRooms() == null || alert.minimumRooms() <= property.getNumberOfRooms()) &&
+                (alert.maximumRooms() == null || alert.maximumRooms() >= property.getNumberOfRooms()) &&
+                (alert.minimumSquareMeters() == null || alert.minimumSquareMeters() <= property.getSquareMeters()) &&
+                (alert.maximumSquareMeters() == null || alert.maximumSquareMeters() >= property.getSquareMeters());
+    }
+
+    private static String readJSONFileContent(String file) {
+        try {
+            return Files.readString(Paths.get(file));
+        } catch (IOException e) {
+            return "[]";
+        }
+    }
+
     public void execute(int id, String description, String postalCode, int price, int numberOfRooms, int squareMeters,
                         int ownerId) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException {
         Property property;
@@ -46,32 +64,32 @@ public class AddProperty {
                 String usersAsString = readJSONFileContent(usersFile);
                 User[] users = new Gson().fromJson(usersAsString, User[].class);
                 Optional<User> user = Arrays.stream(users).filter(u -> u.getId() == ownerId).findFirst();
-                if (user.isPresent()) {
-                    String propertiesAsString = readJSONFileContent(propertiesFile);
-                    ArrayList<Property> allProperties =
-                            new ArrayList<>(Arrays.asList(new Gson().fromJson(propertiesAsString, Property[].class)));
-                    property = new Property(id, description, postalCode, price, numberOfRooms, squareMeters, ownerId);
-                    allProperties.add(property);
-                    writePropertiesFile(allProperties);
-                    ArrayList<Alert> alerts =
-                            new ArrayList<>(Arrays.asList(new Gson().fromJson(readJSONFileContent(alertsFile), Alert[].class)));
-                    for (Alert alert : alerts) {
-                        if (hasToSendTheAlert(property, alert)) {
-                            Optional<User> userToAlert = Arrays.stream(users).filter(u -> u.getId() == alert.userId()).findFirst();
-                            if (alert.alertType().toUpperCase().equals(AlertType.EMAIL.name())) {
-                                emailSender.sendEmail(new Email("noreply@codium.team", userToAlert.get().getEmail(), "There is a new property at " + property.getPostalCode(), "More information at https://properties.codium.team/" + property.getId()));
-                            }
-                            if (alert.alertType().toUpperCase().equals(AlertType.SMS.name())) {
-                                smsSender.sendSMSAlert(new SmsMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
-                            }
-                            if (alert.alertType().toUpperCase().equals(AlertType.PUSH.name())) {
-                                pushSender.sendPushNotification(new PushMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
-                            }
-                        }
-                    }
-                } else {
+                if (!user.isPresent()) {
                     throw new InvalidUserIdException("The owner " + ownerId + " does not exist");
                 }
+                String propertiesAsString = readJSONFileContent(propertiesFile);
+                ArrayList<Property> allProperties =
+                        new ArrayList<>(Arrays.asList(new Gson().fromJson(propertiesAsString, Property[].class)));
+                property = new Property(id, description, postalCode, price, numberOfRooms, squareMeters, ownerId);
+                allProperties.add(property);
+                writePropertiesFile(allProperties);
+                ArrayList<Alert> alerts =
+                        new ArrayList<>(Arrays.asList(new Gson().fromJson(readJSONFileContent(alertsFile), Alert[].class)));
+                for (Alert alert : alerts) {
+                    if (hasToSendTheAlert(property, alert)) {
+                        Optional<User> userToAlert = Arrays.stream(users).filter(u -> u.getId() == alert.userId()).findFirst();
+                        if (alert.alertType().toUpperCase().equals(AlertType.EMAIL.name())) {
+                            emailSender.sendEmail(new Email("noreply@codium.team", userToAlert.get().getEmail(), "There is a new property at " + property.getPostalCode(), "More information at https://properties.codium.team/" + property.getId()));
+                        }
+                        if (alert.alertType().toUpperCase().equals(AlertType.SMS.name())) {
+                            smsSender.sendSMSAlert(new SmsMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
+                        }
+                        if (alert.alertType().toUpperCase().equals(AlertType.PUSH.name())) {
+                            pushSender.sendPushNotification(new PushMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
+                        }
+                    }
+                }
+
             } else {
                 throw new InvalidPriceException("Price cannot be negative");
             }
@@ -95,24 +113,6 @@ public class AddProperty {
             logger.log(data);
         }
 
-    }
-
-    private static boolean hasToSendTheAlert(Property property, Alert alert) {
-        return alert.postalCode().equals(property.getPostalCode()) &&
-                (alert.minimumPrice() == null || alert.minimumPrice() <= property.getPrice()) &&
-                (alert.maximumPrice() == null || alert.maximumPrice() >= property.getPrice()) &&
-                (alert.minimumRooms() == null || alert.minimumRooms() <= property.getNumberOfRooms()) &&
-                (alert.maximumRooms() == null || alert.maximumRooms() >= property.getNumberOfRooms()) &&
-                (alert.minimumSquareMeters() == null || alert.minimumSquareMeters() <= property.getSquareMeters()) &&
-                (alert.maximumSquareMeters() == null || alert.maximumSquareMeters() >= property.getSquareMeters());
-    }
-
-    private static String readJSONFileContent(String file) {
-        try {
-            return Files.readString(Paths.get(file));
-        } catch (IOException e) {
-            return "[]";
-        }
     }
 
     private void writePropertiesFile(ArrayList<Property> allProperties) {
