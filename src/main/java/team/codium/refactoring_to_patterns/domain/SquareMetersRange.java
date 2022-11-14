@@ -8,7 +8,7 @@ public class SquareMetersRange {
         this.maximumSquareMeters = maximumSquareMeters;
     }
 
-    public boolean isInRange(Integer minimumSquareMeters, Integer maximumSquareMeters, Property property) {
+    public boolean isInRange(Property property) {
         return (minimumSquareMeters == null || property.getSquareMeters() >= minimumSquareMeters) &&
                 (maximumSquareMeters == null || property.getSquareMeters() <= maximumSquareMeters);
     }

@@ -34,7 +34,7 @@ final public class SearchProperty {
                 .filter(property -> property.getPostalCode().equals(postalCode))
                 .filter(property -> priceRange.isInRange(property))
                 .filter(property -> roomRange.isInRange(property))
-                .filter(property -> squareMetersRange.isInRange(minimumSquareMeters, maximumSquareMeters, property))
+                .filter(property -> squareMetersRange.isInRange(property))
                 .toArray(Property[]::new);
 
 
