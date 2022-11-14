@@ -28,26 +28,26 @@ final public class SearchProperty {
     public Property[] search(String postalCode, Integer minimumPrice, Integer maximumPrice, Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters, Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException {
         Property[] properties;
         if (Pattern.matches("^\\d{5}$", postalCode)) {
-            if (minimumPrice == null || minimumPrice >= 0) {
-                if (!(minimumPrice == null || maximumPrice == null || minimumPrice <= maximumPrice)) {
-                    throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
-                }
-
-                String propertiesAsString = readPropertiesFile();
-                Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
-                properties = Arrays.stream(allProperties)
-                        .filter(property -> property.getPostalCode().equals(postalCode))
-                        .filter(property -> (minimumPrice == null || property.getPrice() >= minimumPrice) &&
-                                (maximumPrice == null || property.getPrice() <= maximumPrice))
-                        .filter(property -> (minimumRooms == null || property.getNumberOfRooms() >= minimumRooms) &&
-                                (maximumRooms == null || property.getNumberOfRooms() <= maximumRooms))
-                        .filter(property -> (minimumSquareMeters == null || property.getSquareMeters() >= minimumSquareMeters) &&
-                                (maximumSquareMeters == null || property.getSquareMeters() <= maximumSquareMeters))
-                        .toArray(Property[]::new);
-
-            } else {
+            if (!(minimumPrice == null || minimumPrice >= 0)) {
                 throw new InvalidPriceException("Price cannot be negative");
             }
+            if (!(minimumPrice == null || maximumPrice == null || minimumPrice <= maximumPrice)) {
+                throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
+            }
+
+            String propertiesAsString = readPropertiesFile();
+            Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
+            properties = Arrays.stream(allProperties)
+                    .filter(property -> property.getPostalCode().equals(postalCode))
+                    .filter(property -> (minimumPrice == null || property.getPrice() >= minimumPrice) &&
+                            (maximumPrice == null || property.getPrice() <= maximumPrice))
+                    .filter(property -> (minimumRooms == null || property.getNumberOfRooms() >= minimumRooms) &&
+                            (maximumRooms == null || property.getNumberOfRooms() <= maximumRooms))
+                    .filter(property -> (minimumSquareMeters == null || property.getSquareMeters() >= minimumSquareMeters) &&
+                            (maximumSquareMeters == null || property.getSquareMeters() <= maximumSquareMeters))
+                    .toArray(Property[]::new);
+
+
         } else {
             throw new InvalidPostalCodeException(postalCode + " is not a valid postal code");
         }
