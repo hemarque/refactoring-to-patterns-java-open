@@ -45,9 +45,8 @@ public class AddAlert {
     public void execute(Integer userId, String alertType, String postalCode, Integer minimumPrice, Integer maximumPrice,
                         Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters,
                         Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException, InvalidAlertTypeException {
-        if (!Pattern.matches("^\\d{5}$", postalCode)) {
-            throw new InvalidPostalCodeException(postalCode + " is not a valid postal code");
-        }
+        new PostalCode(postalCode);
+
         if (!(minimumPrice == null || minimumPrice >= 0)) {
             throw new InvalidPriceException("Price cannot be negative");
         }
