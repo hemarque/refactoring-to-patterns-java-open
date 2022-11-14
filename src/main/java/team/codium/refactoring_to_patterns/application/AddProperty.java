@@ -60,39 +60,39 @@ public class AddProperty {
                         int ownerId) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException {
         Property property;
         if (Pattern.matches("^\\d{5}$", postalCode)) {
-            if (price >= 0) {
-                String usersAsString = readJSONFileContent(usersFile);
-                User[] users = new Gson().fromJson(usersAsString, User[].class);
-                Optional<User> user = Arrays.stream(users).filter(u -> u.getId() == ownerId).findFirst();
-                if (!user.isPresent()) {
-                    throw new InvalidUserIdException("The owner " + ownerId + " does not exist");
-                }
-                String propertiesAsString = readJSONFileContent(propertiesFile);
-                ArrayList<Property> allProperties =
-                        new ArrayList<>(Arrays.asList(new Gson().fromJson(propertiesAsString, Property[].class)));
-                property = new Property(id, description, postalCode, price, numberOfRooms, squareMeters, ownerId);
-                allProperties.add(property);
-                writePropertiesFile(allProperties);
-                ArrayList<Alert> alerts =
-                        new ArrayList<>(Arrays.asList(new Gson().fromJson(readJSONFileContent(alertsFile), Alert[].class)));
-                for (Alert alert : alerts) {
-                    if (hasToSendTheAlert(property, alert)) {
-                        Optional<User> userToAlert = Arrays.stream(users).filter(u -> u.getId() == alert.userId()).findFirst();
-                        if (alert.alertType().toUpperCase().equals(AlertType.EMAIL.name())) {
-                            emailSender.sendEmail(new Email("noreply@codium.team", userToAlert.get().getEmail(), "There is a new property at " + property.getPostalCode(), "More information at https://properties.codium.team/" + property.getId()));
-                        }
-                        if (alert.alertType().toUpperCase().equals(AlertType.SMS.name())) {
-                            smsSender.sendSMSAlert(new SmsMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
-                        }
-                        if (alert.alertType().toUpperCase().equals(AlertType.PUSH.name())) {
-                            pushSender.sendPushNotification(new PushMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
-                        }
-                    }
-                }
-
-            } else {
+            if (!(price >= 0)) {
                 throw new InvalidPriceException("Price cannot be negative");
             }
+            String usersAsString = readJSONFileContent(usersFile);
+            User[] users = new Gson().fromJson(usersAsString, User[].class);
+            Optional<User> user = Arrays.stream(users).filter(u -> u.getId() == ownerId).findFirst();
+            if (!user.isPresent()) {
+                throw new InvalidUserIdException("The owner " + ownerId + " does not exist");
+            }
+            String propertiesAsString = readJSONFileContent(propertiesFile);
+            ArrayList<Property> allProperties =
+                    new ArrayList<>(Arrays.asList(new Gson().fromJson(propertiesAsString, Property[].class)));
+            property = new Property(id, description, postalCode, price, numberOfRooms, squareMeters, ownerId);
+            allProperties.add(property);
+            writePropertiesFile(allProperties);
+            ArrayList<Alert> alerts =
+                    new ArrayList<>(Arrays.asList(new Gson().fromJson(readJSONFileContent(alertsFile), Alert[].class)));
+            for (Alert alert : alerts) {
+                if (hasToSendTheAlert(property, alert)) {
+                    Optional<User> userToAlert = Arrays.stream(users).filter(u -> u.getId() == alert.userId()).findFirst();
+                    if (alert.alertType().toUpperCase().equals(AlertType.EMAIL.name())) {
+                        emailSender.sendEmail(new Email("noreply@codium.team", userToAlert.get().getEmail(), "There is a new property at " + property.getPostalCode(), "More information at https://properties.codium.team/" + property.getId()));
+                    }
+                    if (alert.alertType().toUpperCase().equals(AlertType.SMS.name())) {
+                        smsSender.sendSMSAlert(new SmsMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
+                    }
+                    if (alert.alertType().toUpperCase().equals(AlertType.PUSH.name())) {
+                        pushSender.sendPushNotification(new PushMessage(userToAlert.get().getPhoneNumber(), "There is a new property at " + property.getPostalCode() + ". More information at https://properties.codium.team/" + property.getId()));
+                    }
+                }
+            }
+
+
         } else {
             throw new InvalidPostalCodeException(postalCode + " is not a valid postal code");
         }
