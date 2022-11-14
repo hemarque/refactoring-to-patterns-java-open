@@ -29,9 +29,7 @@ final public class SearchProperty {
         if (!(minimumPrice == null || minimumPrice >= 0)) {
             throw new InvalidPriceException("Price cannot be negative");
         }
-        if (!(minimumPrice == null || maximumPrice == null || minimumPrice <= maximumPrice)) {
-            throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
-        }
+        new PriceRange(minimumPrice, maximumPrice);
 
         String propertiesAsString = readPropertiesFile();
         Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
