@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 public class AddAlert {
     private final String alertsFile;
@@ -42,24 +41,22 @@ public class AddAlert {
         }
     }
 
-    public void execute(Integer userId, String alertType, String postalCode, Integer minimumPrice, Integer maximumPrice,
-                        Integer minimumRooms, Integer maximumRooms, Integer minimumSquareMeters,
-                        Integer maximumSquareMeters) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException, InvalidAlertTypeException {
-        new PostalCode(postalCode);
-        new Price(minimumPrice);
-        new PriceRange(minimumPrice, maximumPrice);
+    public void execute(AddAlertCommand addAlertCommand) throws InvalidPostalCodeException, InvalidPriceException, InvalidUserIdException, InvalidAlertTypeException {
+        new PostalCode(addAlertCommand.postalCode());
+        new Price(addAlertCommand.minimumPrice());
+        new PriceRange(addAlertCommand.minimumPrice(), addAlertCommand.maximumPrice());
 
-        if (!isAlertTypeValid(alertType)) {
-            throw new InvalidAlertTypeException("The alert type " + alertType + " does not exist");
+        if (!isAlertTypeValid(addAlertCommand.alertType())) {
+            throw new InvalidAlertTypeException("The alert type " + addAlertCommand.alertType() + " does not exist");
         }
         String usersAsString = readJSONFileContent(usersFile);
         User[] users = new Gson().fromJson(usersAsString, User[].class);
-        boolean userExists = Arrays.stream(users).anyMatch(user -> user.getId() == userId);
+        boolean userExists = Arrays.stream(users).anyMatch(user -> user.getId() == addAlertCommand.userId());
         if (!userExists) {
-            throw new InvalidUserIdException("The user " + userId + " does not exist");
+            throw new InvalidUserIdException("The user " + addAlertCommand.userId() + " does not exist");
         }
         ArrayList<Alert> alerts = readAlerts();
-        Alert alert = new Alert(userId, alertType, postalCode, minimumPrice, maximumPrice, minimumRooms, maximumRooms, minimumSquareMeters, maximumSquareMeters);
+        Alert alert = new Alert(addAlertCommand.userId(), addAlertCommand.alertType(), addAlertCommand.postalCode(), addAlertCommand.minimumPrice(), addAlertCommand.maximumPrice(), addAlertCommand.minimumRooms(), addAlertCommand.maximumRooms(), addAlertCommand.minimumSquareMeters(), addAlertCommand.maximumSquareMeters());
         alerts.add(alert);
         try {
             Files.writeString(Paths.get(alertsFile), new Gson().toJson(alerts));
@@ -68,15 +65,15 @@ public class AddAlert {
 
         if (logger != null) {
             HashMap<String, Object> data = new HashMap<>() {{
-                put("userId", userId);
-                put("alertType", alertType);
-                put("postalCode", postalCode);
-                put("minimumPrice", minimumPrice);
-                put("maximumPrice", maximumPrice);
-                put("minimumRooms", minimumRooms);
-                put("maximumRooms", maximumRooms);
-                put("minimumSquareMeters", minimumSquareMeters);
-                put("maximumSquareMeters", maximumSquareMeters);
+                put("userId", addAlertCommand.userId());
+                put("alertType", addAlertCommand.alertType());
+                put("postalCode", addAlertCommand.postalCode());
+                put("minimumPrice", addAlertCommand.minimumPrice());
+                put("maximumPrice", addAlertCommand.maximumPrice());
+                put("minimumRooms", addAlertCommand.minimumRooms());
+                put("maximumRooms", addAlertCommand.maximumRooms());
+                put("minimumSquareMeters", addAlertCommand.minimumSquareMeters());
+                put("maximumSquareMeters", addAlertCommand.maximumSquareMeters());
             }};
             if (addDateToLogger) {
                 data.put("date", LocalDate.now());

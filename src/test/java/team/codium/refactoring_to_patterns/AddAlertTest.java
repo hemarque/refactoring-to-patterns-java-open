@@ -31,7 +31,7 @@ public class AddAlertTest {
     public void can_add_an_alert_with_all_the_searchable_fields() throws Exception {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         String content = Files.readString(Paths.get((ALERTS_FILE)));
         ArrayList<Alert> alerts = new ArrayList<>(Arrays.asList(new Gson().fromJson(content, Alert[].class)));
@@ -52,7 +52,7 @@ public class AddAlertTest {
     public void can_add_an_alert_only_with_postal_code() throws Exception {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.execute(1, "email", "08030", null, null, null, null, null, null);
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", null, null, null, null, null, null));
 
         String content = Files.readString(Paths.get(ALERTS_FILE));
         ArrayList<Alert> alerts = new ArrayList<>(Arrays.asList(new Gson().fromJson(content, Alert[].class)));
@@ -70,8 +70,8 @@ public class AddAlertTest {
     public void can_store_more_than_one_alert() throws Exception {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.execute(1, "email", "08030", null, null, null, null, null, null);
-        addAlert.execute(1, "email", "08030", null, null, null, null, null, null);
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", null, null, null, null, null, null));
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", null, null, null, null, null, null));
 
         String content = Files.readString(Paths.get(ALERTS_FILE));
         ArrayList<Alert> alerts = new ArrayList<>(Arrays.asList(new Gson().fromJson(content, Alert[].class)));
@@ -83,7 +83,7 @@ public class AddAlertTest {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
         InvalidPostalCodeException exception = Assertions.assertThrows(InvalidPostalCodeException.class, () ->
-                addAlert.execute(1, "email", "080300", null, null, null, null, null, null)
+                addAlert.execute(new AddAlertCommand(1, "email", "080300", null, null, null, null, null, null))
         );
 
         assertThat(exception.getMessage(), Matchers.is("080300 is not a valid postal code"));
@@ -94,7 +94,7 @@ public class AddAlertTest {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
         InvalidPriceException exception = Assertions.assertThrows(InvalidPriceException.class, () ->
-                addAlert.execute(1, "email", "08030", -1, null, null, null, null, null)
+                addAlert.execute(new AddAlertCommand(1, "email", "08030", -1, null, null, null, null, null))
         );
 
         assertThat(exception.getMessage(), Matchers.is("Price cannot be negative"));
@@ -105,7 +105,7 @@ public class AddAlertTest {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
         InvalidPriceException exception = Assertions.assertThrows(InvalidPriceException.class, () ->
-                addAlert.execute(1, "email", "08030", 100_001, 100_000, null, null, null, null)
+                addAlert.execute(new AddAlertCommand(1, "email", "08030", 100_001, 100_000, null, null, null, null))
         );
 
         assertThat(exception.getMessage(), Matchers.is("The minimum price should be bigger than the maximum price"));
@@ -116,7 +116,7 @@ public class AddAlertTest {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
         InvalidUserIdException exception = Assertions.assertThrows(InvalidUserIdException.class, () ->
-                addAlert.execute(NON_EXISTING_USER, "email", "08030", null, null, null, null, null, null)
+                addAlert.execute(new AddAlertCommand(NON_EXISTING_USER, "email", "08030", null, null, null, null, null, null))
         );
 
         assertThat(exception.getMessage(), Matchers.is("The user " + NON_EXISTING_USER + " does not exist"));
@@ -127,7 +127,7 @@ public class AddAlertTest {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
         InvalidAlertTypeException exception = Assertions.assertThrows(InvalidAlertTypeException.class, () ->
-                addAlert.execute(1, "asdf", "08030", null, null, null, null, null, null)
+                addAlert.execute(new AddAlertCommand(1, "asdf", "08030", null, null, null, null, null, null))
         );
 
         assertThat(exception.getMessage(), Matchers.is("The alert type asdf does not exist"));
@@ -138,7 +138,7 @@ public class AddAlertTest {
     public void succeed_with_any_alert_type(String alertType) throws Exception {
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.execute(1, alertType, "08030", null, null, null, null, null, null);
+        addAlert.execute(new AddAlertCommand(1, alertType, "08030", null, null, null, null, null, null));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class AddAlertTest {
         InMemoryLogger logger = new InMemoryLogger();
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, logger, false);
 
-        addAlert.execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         assertThat(logger.getLoggedData().size(), Matchers.is(1));
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
@@ -166,7 +166,7 @@ public class AddAlertTest {
         InMemoryLogger logger = new InMemoryLogger();
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, logger, true);
 
-        addAlert.execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
         assertThat(loggedData.containsKey("date"), Matchers.is(true));
@@ -177,7 +177,7 @@ public class AddAlertTest {
         InMemoryLogger logger = new InMemoryLogger();
         AddAlert addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, logger, false);
 
-        addAlert.execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         HashMap<String, Object> loggedData = logger.getLoggedData().get(0);
         assertThat(loggedData.containsKey("date"), Matchers.is(false));
