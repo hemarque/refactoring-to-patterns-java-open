@@ -27,15 +27,14 @@ final public class SearchProperty {
         new Price(minimumPrice);
         PriceRange priceRange = new PriceRange(minimumPrice, maximumPrice);
         RoomRange roomRange = new RoomRange(minimumRooms, maximumRooms);
-
+        SquareMetersRange squareMetersRange = new SquareMetersRange(minimumSquareMeters, maximumSquareMeters);
         String propertiesAsString = readPropertiesFile();
         Property[] allProperties = new Gson().fromJson(propertiesAsString, Property[].class);
         properties = Arrays.stream(allProperties)
                 .filter(property -> property.getPostalCode().equals(postalCode))
                 .filter(property -> priceRange.isInRange(property))
                 .filter(property -> roomRange.isInRange(property))
-                .filter(property -> (minimumSquareMeters == null || property.getSquareMeters() >= minimumSquareMeters) &&
-                        (maximumSquareMeters == null || property.getSquareMeters() <= maximumSquareMeters))
+                .filter(property -> squareMetersRange.isInRange(minimumSquareMeters, maximumSquareMeters, property))
                 .toArray(Property[]::new);
 
 
